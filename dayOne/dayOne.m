@@ -2,6 +2,10 @@ fileID = fopen('input.txt', 'r');
 modules = fscanf(fileID, '%d');
 fclose(fileID);
 
-fuels = floor(modules / 3) - 2;
+fuels = modules;
+
+for i = 1:length(modules)
+    fuels(i) = CalculateFuel(modules(i));
+end
 
 disp(sum(fuels));
