@@ -1,33 +1,53 @@
 clear;
 
 fileID = fopen('input.txt', 'r');
-integers = fscanf(fileID, '%d,');
+program = fscanf(fileID, '%d,');
 fclose(fileID);
 
-position = 0;
+OUTPUT = 19690720;
 
-integers(1 + 1) = 12;
-integers(2 + 1) = 2;
+alreadyTried = [];
 
-while (position < length(integers) && GetIntAtPos(integers, position) ~= 99)
-    switch GetIntAtPos(integers, position)
-        case 1
-            integers(GetIntAtPos(integers, position + 3) + 1) = integers(GetIntAtPos(integers, position + 1) + 1) + integers(GetIntAtPos(integers, position + 2) + 1);
-        case 2
-            integers(GetIntAtPos(integers, position + 3) + 1) = integers(GetIntAtPos(integers, position + 1) + 1) * integers(GetIntAtPos(integers, position + 2) + 1);
-        case 99
-            break;
-        otherwise
-            disp('Unknown opcode!' + num2str(GetIntAtPos(integers, position)));
-            break;
+memory = program;
+i = 0;
+while (memory(0 + 1) ~= OUTPUT)
+    [noun, verb] = GenerateNounAndVerb(alreadyTried);
+    alreadyTried(end + 1) = 100 * noun + verb;
+
+    memory = program;
+    memory(1 + 1) = noun;
+    memory(2 + 1) = verb;
+
+    instrPtr = 0;
+    while (instrPtr < length(memory) && GetIntAtPos(memory, instrPtr) ~= 99)
+        switch GetIntAtPos(memory, instrPtr)
+            case 1
+                memory(GetIntAtPos(memory, instrPtr + 3) + 1) = memory(GetIntAtPos(memory, instrPtr + 1) + 1) + memory(GetIntAtPos(memory, instrPtr + 2) + 1);
+            case 2
+                memory(GetIntAtPos(memory, instrPtr + 3) + 1) = memory(GetIntAtPos(memory, instrPtr + 1) + 1) * memory(GetIntAtPos(memory, instrPtr + 2) + 1);
+            case 99
+                break;
+            otherwise
+                disp('Unknown opcode!' + num2str(GetIntAtPos(memory, instrPtr)));
+                break;
+        end
+
+        instrPtr = instrPtr + 4;
     end
+end
     
-    position = position + 4;
+disp(100 * noun + verb);
+
+function integer = GetIntAtPos(program, instrPtr)
+    % because MATLAB is a 1-indexed language
+    integer = program(instrPtr + 1);
 end
 
-disp(integers(0 + 1));
-
-function integer = GetIntAtPos(integers, position)
-    % because MATLAB is a 1-indexed language
-    integer = integers(position + 1);
+function [noun, verb] = GenerateNounAndVerb(alreadyTried)
+    noun = randi([0, 99]);
+    verb = randi([0, 99]);
+    
+    if (any(ismember(alreadyTried, 100 * noun + verb)))
+        [noun, verb] = GenerateNounAndVerb(alreadyTried);
+    end
 end
